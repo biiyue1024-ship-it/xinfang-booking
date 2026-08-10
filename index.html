@@ -9,26 +9,29 @@
   </style>
 </head>
 <body>
-  <main class="wrap"><h1>欣坊髮型</h1><p class="intro">填寫預約資料後，LINE 會傳送確認與提醒。</p><section class="card"><form id="bookingForm"><label>姓名<input id="name" required></label><label>電話<input id="phone" type="tel" required></label><label>服務項目<select id="service"><option>剪髮造型</option><option>染髮</option><option>燙髮</option><option>頭皮護理</option><option>其他諮詢</option></select></label><label>預約日期<input id="date" type="date" required></label><label>預約時間<input id="time" type="time" required></label><label>備註<textarea id="note" placeholder="想要的髮型、髮長或其他需求"></textarea></label><button type="submit">送出預約</button><div class="status" id="status"></div></form></section></main>
+  <main class="wrap"><h1>欣坊髮型</h1><p class="intro">填寫預約資料後，LINE 會傳送確認與提醒。</p><section class="card"><form id="bookingForm" method="post"><input type="hidden" name="action" value="booking"><input id="payload" type="hidden" name="payload"><label>姓名<input id="name" required></label><label>電話<input id="phone" type="tel" required></label><label>服務項目<select id="service"><option>剪髮造型</option><option>染髮</option><option>燙髮</option><option>頭皮護理</option><option>其他諮詢</option></select></label><label>預約日期<input id="date" type="date" required></label><label>預約時間<input id="time" type="time" required></label><label>備註<textarea id="note" placeholder="想要的髮型、髮長或其他需求"></textarea></label><button id="submitButton" type="submit" disabled>正在連線 LINE…</button><div class="status" id="status">正在確認 LINE 登入狀態…</div></form></section></main>
   <script>
-    const LIFF_ID = '2011053669-GxvTE6xM';
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTk6RBFW3yP3Lud0Q5xt-jk50vhFCjVF6BHb_e_1Q6jYjpTo42bboFQdiAt-l4FPIMzQ/exec';
-    const OA_URL = 'https://lin.ee/vEvade6';
+    const LIFF_ID = 'PASTE_LIFF_ID_HERE';
+    const APPS_SCRIPT_URL = 'PASTE_APPS_SCRIPT_EXEC_URL_HERE';
     const status = document.getElementById('status');
     let userId = '';
 
     async function init() {
       try {
-        await liff.init({ liffId: LIFF_ID });
+        await liff.init({ liffId: LIFF_ID, withLoginOnExternalBrowser: true });
         if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
         userId = (await liff.getProfile()).userId;
-      } catch (error) { status.textContent = 'LINE 連線失敗，請從 LINE 內重新開啟預約連結。'; }
+        document.getElementById('submitButton').disabled = false;
+        document.getElementById('submitButton').textContent = '送出預約';
+        status.textContent = 'LINE 登入完成，可以送出預約。';
+      } catch (error) {
+        status.textContent = 'LINE 登入失敗：' + (error.message || '請從 LINE 對話重新開啟預約連結。');
+      }
     }
     init();
 
-    document.getElementById('bookingForm').addEventListener('submit', async event => {
-      event.preventDefault();
-      if (!userId) { status.textContent = 'LINE 尚未完成登入，請稍候再試。'; return; }
+    document.getElementById('bookingForm').addEventListener('submit', event => {
+      if (!userId) { event.preventDefault(); status.textContent = 'LINE 尚未完成登入，請稍候再試。'; return; }
       status.textContent = '正在送出預約…';
       const data = {
         userId,
@@ -39,11 +42,8 @@
         time: document.getElementById('time').value,
         note: document.getElementById('note').value
       };
-      try {
-        await fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: new URLSearchParams({ action: 'booking', payload: JSON.stringify(data) }) });
-        status.textContent = '預約已送出，請留意 LINE 確認訊息。';
-        setTimeout(() => { location.href = OA_URL; }, 1100);
-      } catch (error) { status.textContent = '送出失敗，請稍後再試。'; }
+      document.getElementById('payload').value = JSON.stringify(data);
+      event.currentTarget.action = APPS_SCRIPT_URL;
     });
   </script>
 </body>
