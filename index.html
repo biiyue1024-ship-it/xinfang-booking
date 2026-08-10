@@ -11,8 +11,8 @@
 <body>
   <main class="wrap"><h1>欣坊髮型</h1><p class="intro">填寫預約資料後，LINE 會傳送確認與提醒。</p><section class="card"><form id="bookingForm"><label>姓名<input id="name" required></label><label>電話<input id="phone" type="tel" required></label><label>服務項目<select id="service"><option>剪髮造型</option><option>染髮</option><option>燙髮</option><option>頭皮護理</option><option>其他諮詢</option></select></label><label>預約日期<input id="date" type="date" required></label><label>預約時間<input id="time" type="time" required></label><label>備註<textarea id="note" placeholder="想要的髮型、髮長或其他需求"></textarea></label><button type="submit">送出預約</button><div class="status" id="status"></div></form></section></main>
   <script>
-    const LIFF_ID = 'PASTE_LIFF_ID_HERE';
-    const APPS_SCRIPT_URL = 'PASTE_APPS_SCRIPT_EXEC_URL_HERE';
+    const LIFF_ID = '2011053669-GxvTE6xM';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTk6RBFW3yP3Lud0Q5xt-jk50vhFCjVF6BHb_e_1Q6jYjpTo42bboFQdiAt-l4FPIMzQ/exec';
     const OA_URL = 'https://lin.ee/vEvade6';
     const status = document.getElementById('status');
     let userId = '';
