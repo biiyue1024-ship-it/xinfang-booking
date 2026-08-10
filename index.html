@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>欣坊髮型｜線上預約</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <style>
+    body{margin:0;background:#f8f6fc;color:#241b31;font-family:Arial,'Microsoft JhengHei',sans-serif}.wrap{max-width:540px;margin:auto;padding:32px 20px}h1{margin:0;color:#7651c8}.intro{color:#756c82;line-height:1.7}.card{background:#fff;border-radius:20px;padding:24px;box-shadow:0 10px 35px #5b387014}label{display:block;font-size:14px;font-weight:700;margin-top:16px}input,select,textarea{box-sizing:border-box;width:100%;margin-top:7px;padding:12px;border:1px solid #ded7e8;border-radius:9px;font:inherit}textarea{min-height:85px}button{width:100%;border:0;border-radius:999px;padding:14px;background:#7651c8;color:#fff;font-size:16px;font-weight:700;margin-top:24px}.status{margin-top:15px;color:#7651c8;font-weight:700}
+  </style>
+</head>
+<body>
+  <main class="wrap"><h1>欣坊髮型</h1><p class="intro">填寫預約資料後，LINE 會傳送確認與提醒。</p><section class="card"><form id="bookingForm"><label>姓名<input id="name" required></label><label>電話<input id="phone" type="tel" required></label><label>服務項目<select id="service"><option>剪髮造型</option><option>染髮</option><option>燙髮</option><option>頭皮護理</option><option>其他諮詢</option></select></label><label>預約日期<input id="date" type="date" required></label><label>預約時間<input id="time" type="time" required></label><label>備註<textarea id="note" placeholder="想要的髮型、髮長或其他需求"></textarea></label><button type="submit">送出預約</button><div class="status" id="status"></div></form></section></main>
+  <script>
+    const LIFF_ID = 'PASTE_LIFF_ID_HERE';
+    const APPS_SCRIPT_URL = 'PASTE_APPS_SCRIPT_EXEC_URL_HERE';
+    const OA_URL = 'https://lin.ee/vEvade6';
+    const status = document.getElementById('status');
+    let userId = '';
+
+    async function init() {
+      try {
+        await liff.init({ liffId: LIFF_ID });
+        if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+        userId = (await liff.getProfile()).userId;
+      } catch (error) { status.textContent = 'LINE 連線失敗，請從 LINE 內重新開啟預約連結。'; }
+    }
+    init();
+
+    document.getElementById('bookingForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      if (!userId) { status.textContent = 'LINE 尚未完成登入，請稍候再試。'; return; }
+      status.textContent = '正在送出預約…';
+      const data = {
+        userId,
+        name: document.getElementById('name').value,
+        phone: document.getElementById('phone').value,
+        service: document.getElementById('service').value,
+        date: document.getElementById('date').value,
+        time: document.getElementById('time').value,
+        note: document.getElementById('note').value
+      };
+      try {
+        await fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: new URLSearchParams({ action: 'booking', payload: JSON.stringify(data) }) });
+        status.textContent = '預約已送出，請留意 LINE 確認訊息。';
+        setTimeout(() => { location.href = OA_URL; }, 1100);
+      } catch (error) { status.textContent = '送出失敗，請稍後再試。'; }
+    });
+  </script>
+</body>
+</html>
